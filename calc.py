@@ -35,7 +35,11 @@ def tokeniser(string: str):
 
 
 def step(tokens: list):
-    left = tokens[0]
+    for i in range(len(tokens)-2):
+        if tokens[i].type == "INTEGER":
+            if tokens[i+1].type == "TIMES":
+                    r = tokens[i] * tokens[i+2]
+
 
 
 def syntax_check(string: str):
@@ -50,6 +54,8 @@ def syntax_check(string: str):
     for i in range(len(string)-1):
         if string[i] in ["+", "*", "-", "/"] and string[i+1] in ["+", "*", "-", "/"]:
             return False
+    if string[0] in ["+", "*", "-", "/"] or string[-1] in ["+", "*", "-", "/"]:
+        return False
     return compt == 0
 
 # print(syntax_check("183)7(3+g)dyd+"))
