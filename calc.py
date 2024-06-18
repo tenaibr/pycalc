@@ -30,16 +30,36 @@ def tokeniser(string: str):
         elif string[i] == ")":
             tokens.append(Token("RPAREN", ")"))
         else:
-            raise SyntaxError(f"{i} {string[i]}")
+            raise SyntaxError(f"char {string[i]} at {i}")
     return tokens
 
 
-def step(tokens: list):
+def calc(tokens: list):
+    r = 0
     for i in range(len(tokens)-2):
-        if tokens[i].type == "INTEGER":
-            if tokens[i+1].type == "TIMES":
-                    r = tokens[i] * tokens[i+2]
+        if i > len(tokens)-2:
+            return calc(tokens)
+        elif tokens[i].type == "INTEGER":
+            if tokens[i+2].type == "INTEGER":
+                if tokens[i+1].type == "TIMES":
+                    r = tokens[i].value * tokens[i+2].value
+                elif tokens[i+1].type == "DIVIDE":
+                    r = tokens[i].value / tokens[i+2]
+                for _ in range(2):
+                    tokens.pop(i+1)
+                tokens[i].value = r
 
+        elif tokens[i].type in ["PLUS", "TIMES", "MINUS", "DIVIDE"]:
+            pass
+        elif tokens[i].type == "LPAREN":
+            for end in range(i, len(tokens)):
+                if tokens[end].type == "RPAREN":
+                    break
+            tokens[i].value = calc(tokens[i+1:end])
+            tokens[i].type = "INTEGER"
+            for _ in range(end-i):
+                tokens.pop(i+1)
+    return r
 
 
 def syntax_check(string: str):
@@ -64,9 +84,9 @@ def syntax_check(string: str):
 def main(chaine: str):
     if syntax_check(chaine):
         tokens = tokeniser(chaine)
-        print(tokens)
+        # print(tokens)
+        print(calc(tokens))
 
 
 if __name__ == "__main__":
-    main(input("calc>"))
-
+    main(input(">>> "))
