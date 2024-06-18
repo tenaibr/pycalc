@@ -34,24 +34,16 @@ def tokeniser(string: str):
     return tokens
 
 
-def calc(tokens: list):
-    r = 0
+def calc(tokens: list[Token]):
+    r = tokens[0].value
+    prio = False
     for i in range(len(tokens)-2):
-        if i > len(tokens)-2:
+        for a in tokens:
+            if a.type == "TIMES" or a.type == "DIVIDE":
+                prio = True
+        if i >= len(tokens)-2:
             return calc(tokens)
-        elif tokens[i].type == "INTEGER":
-            if tokens[i+2].type == "INTEGER":
-                if tokens[i+1].type == "TIMES":
-                    r = tokens[i].value * tokens[i+2].value
-                elif tokens[i+1].type == "DIVIDE":
-                    r = tokens[i].value / tokens[i+2]
-                for _ in range(2):
-                    tokens.pop(i+1)
-                tokens[i].value = r
-
-        elif tokens[i].type in ["PLUS", "TIMES", "MINUS", "DIVIDE"]:
-            pass
-        elif tokens[i].type == "LPAREN":
+        if tokens[i].type == "LPAREN":
             for end in range(i, len(tokens)):
                 if tokens[end].type == "RPAREN":
                     break
@@ -59,6 +51,26 @@ def calc(tokens: list):
             tokens[i].type = "INTEGER"
             for _ in range(end-i):
                 tokens.pop(i+1)
+        elif tokens[i].type == "INTEGER":
+            if tokens[i+2].type == "INTEGER":
+                if tokens[i+1].type == "TIMES":
+                    r = tokens[i].value * tokens[i+2].value
+                elif tokens[i+1].type == "DIVIDE":
+                    r = tokens[i].value / tokens[i+2].value
+                if not prio:
+                    if tokens[i+1].type == "PLUS":
+                        r = tokens[i].value + tokens[i+2].value
+                    elif tokens[i+1].type == "MINUS":
+                        r = tokens[i].value - tokens[i+2].value
+                if r:
+                    for _ in range(2):
+                        tokens.pop(i+1)
+                    tokens[i].value = r
+        elif tokens[i].type in ["PLUS", "TIMES", "MINUS", "DIVIDE"]:
+            pass
+        print(tokens)
+    if len(tokens) > 1:
+        return calc(tokens)
     return r
 
 
@@ -84,9 +96,16 @@ def syntax_check(string: str):
 def main(chaine: str):
     if syntax_check(chaine):
         tokens = tokeniser(chaine)
-        # print(tokens)
-        print(calc(tokens))
+        print(tokens)
+        return calc(tokens)
+    else:
+        return "Erreur de syntaxe"
 
 
 if __name__ == "__main__":
-    main(input(">>> "))
+    while True:
+        try:
+            print(main(input(">>> ")))
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            break
