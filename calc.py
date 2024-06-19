@@ -35,7 +35,7 @@ def tokeniser(string: str):
 
 
 def calc(tokens: list[Token]):
-    r = tokens[0].value
+    r = None
     prio = False
     for i in range(len(tokens)-2):
         for a in tokens:
@@ -44,8 +44,13 @@ def calc(tokens: list[Token]):
         if i >= len(tokens)-2:
             return calc(tokens)
         if tokens[i].type == "LPAREN":
+            count = 0
             for end in range(i, len(tokens)):
-                if tokens[end].type == "RPAREN":
+                if tokens[end].type == "LPAREN":
+                    count += 1
+                elif tokens[end].type == "RPAREN":
+                    count -= 1
+                if count == 0:
                     break
             tokens[i].value = calc(tokens[i+1:end])
             tokens[i].type = "INTEGER"
@@ -103,6 +108,7 @@ def main(chaine: str):
 
 
 if __name__ == "__main__":
+    import readline
     while True:
         try:
             print(main(input(">>> ")))
