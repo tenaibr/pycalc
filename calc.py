@@ -35,9 +35,9 @@ def tokeniser(string: str):
 
 
 def calc(tokens: list[Token]):
-    r = None
     prio = False
     for i in range(len(tokens)-2):
+        r = None
         for a in tokens:
             if a.type == "TIMES" or a.type == "DIVIDE":
                 prio = True
@@ -67,16 +67,15 @@ def calc(tokens: list[Token]):
                         r = tokens[i].value + tokens[i+2].value
                     elif tokens[i+1].type == "MINUS":
                         r = tokens[i].value - tokens[i+2].value
-                if r:
+                if r is not None:
                     for _ in range(2):
                         tokens.pop(i+1)
                     tokens[i].value = r
         elif tokens[i].type in ["PLUS", "TIMES", "MINUS", "DIVIDE"]:
             pass
-        print(tokens)
     if len(tokens) > 1:
         return calc(tokens)
-    return r
+    return tokens[0].value
 
 
 def syntax_check(string: str):
@@ -95,16 +94,13 @@ def syntax_check(string: str):
         return False
     return compt == 0
 
-# print(syntax_check("183)7(3+g)dyd+"))
-
 
 def main(chaine: str):
     if syntax_check(chaine):
         tokens = tokeniser(chaine)
-        print(tokens)
         return calc(tokens)
     else:
-        return "Erreur de syntaxe"
+        return "Syntax error"
 
 
 if __name__ == "__main__":
